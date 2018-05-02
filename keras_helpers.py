@@ -9,7 +9,7 @@ import imageio
 import keras
 from IPython import display
 from keras import backend
-from helpers import flatten
+from helpers import flatten_1
 from keras import flatten as ft
 
 
@@ -24,7 +24,7 @@ def trainable_weights_collector(Layer):
 	weight_vec = []
 
 	if Layer.__class__.__name__ == 'Sequential':
-		for sl in Layer.flattened_layers:
+		for sl in Layer.flatten_1ed_layers:
 			weight_vec += trainable_weights_collector(sl)
 	elif Layer.__class__.__name__ == 'Model':
 		for sl in Layer.layers:
@@ -73,16 +73,13 @@ class VisualizationCallback(keras.callbacks.Callback):
 
 		super(VisualizationCallback, self).__init__()
 
-
-	def 
-
 	def plot_hist(self, epoch):
 
 		# record the weights of the network 
 		w0 = self.w0
 		wt = self.Model.get_weights()
-		weight_vec_0 = np.squeeze(flatten(w0[:-3]))
-		weight_vec_t = np.squeeze(flatten(wt[:-3]))
+		weight_vec_0 = np.squeeze(flatten_1(w0[:-3]))
+		weight_vec_t = np.squeeze(flatten_1(wt[:-3]))
 
 		# fetch the mean, standard deviations, and, mixing proportions
 
@@ -119,3 +116,19 @@ class VisualizationCallback(keras.callbacks.Callback):
         f.savefig("./.tmp%d.png" % epoch, bbox_inches='tight')
         plt.show()
 
+
+	def begin_training(self, logs = {}):
+		self.w0 = self.Model.get_weights()
+
+	def begin_epoch(self, epoch, logs={}):
+		self.plot_hist(epoch)
+
+	def end_training(self, logs={}):
+		self.plot_hist(epoch=self.ep)
+		img_vec = []
+		files = ["./fig%d.png" % epoch for epoch in np.arange(self.ep + 1)]
+
+		for f in files:
+			img_vec.append(imageio.imread(f))
+			os.remove(f)
+		imageio.mimsave('./Figs/ReTraining.gif', img_vec, duration=0.3)
