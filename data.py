@@ -24,7 +24,3 @@ def import_mnist():
 	Y_Test = util.to_categorical(Y_Test, categories)
 
 	return [X_Train, X_Test], [Y_Train, Y_Test], [rows, cols], categories
-
-
-
-
