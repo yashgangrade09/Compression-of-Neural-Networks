@@ -23,7 +23,8 @@ def invert_flatten_1(input_arr, shaped_arr):
 
 def cmp_merge(inputs):
     """Comparing and merging components."""
-    for iterator in range(3):
+    print(inputs.shape)
+    for iterator in xrange(3):
         arr_list = []
         for it in inputs:
             for i in it:
@@ -101,7 +102,7 @@ def discretesize(W, pi_zero=0.999):
     return invert_flatten_1(result, shaped_array=W[:-3])
 
 def save_histogram(W_T,save, upper_bound=200):
-        w = np.squeeze(special_flatten(W_T[:-3]))
+        w = np.squeeze(flatten_1(W_T[:-3]))
         plt.figure(figsize=(10, 7))
         sns.set(color_codes=True)
         plt.xlim(-1,1)
