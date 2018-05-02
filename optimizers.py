@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
 from keras import backend
-from keras.utils.generic_utils import get_from_module
+# from keras.utils.generic_utils import get_from_module
 from keras.optimizers import Optimizer
 
 class Adam(Optimizer):
@@ -137,7 +137,7 @@ class Adam(Optimizer):
 # aliases
 adam = Adam
 
-
-def get(identifier, kwargs=None):
-    return get_from_module(identifier, globals(), 'optimizer',
-                           instantiate=True, kwargs=kwargs)
+#
+# def get(identifier, kwargs=None):
+#     return get_from_module(identifier, globals(), 'optimizer',
+#                            instantiate=True, kwargs=kwargs)

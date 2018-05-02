@@ -6,7 +6,7 @@ from keras.datasets import mnist
 from keras.utils import np_utils as util 
 from numpy import transpose as T
 
-def import_mnist():
+def get_mnist():
 	rows = 28
 	cols = 28
 	categories = 10
@@ -23,4 +23,4 @@ def import_mnist():
 	Y_Train = util.to_categorical(Y_Train, categories)
 	Y_Test = util.to_categorical(Y_Test, categories)
 
-	return [X_Train, X_Test], [Y_Train, Y_Test], [rows, cols], categories
+	return X_Train, X_Test, Y_Train, Y_Test, rows, cols, categories
