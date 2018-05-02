@@ -78,7 +78,8 @@ def discretesize(W, pi_zero=0.999):
 
     # merge
     index_x, index_y = np.where(K < 1e-10)
-    lists = merger(np.asarray(zip(index_x, index_y)))
+    lists = cmp_merge(np.asarray(zip(index_x, index_y)))
+    #lists = cmp_merge(np.asarray(zip(index_x, index_y)))
     # compute merged components
     # print lists
     new_means, new_log_precision, new_log_pi_vec = [], [], []

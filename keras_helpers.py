@@ -1,6 +1,3 @@
-############### Yeh file dhang se change nahi ho paayi especially Callback wala portion. Didn't know what to do. ###############
-
-
 import os
 import matplotlib.pyplot as plt
 import numpy as np
