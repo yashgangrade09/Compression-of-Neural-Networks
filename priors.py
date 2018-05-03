@@ -3,7 +3,7 @@ import numpy as np
 from keras_helpers import log_sum_exp
 from keras import backend
 from keras.engine.topology import Layer
-from helper_functions import flatten_1
+from helper_functions import special_flatten as flatten_1
 
 
 class GMMPrior(Layer):

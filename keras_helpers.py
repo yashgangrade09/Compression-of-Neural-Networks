@@ -6,7 +6,7 @@ import imageio
 import keras
 from IPython import display
 from keras import backend
-from helper_functions import flatten_1
+from helper_functions import special_flatten
 # from keras import flatten as ft
 
 
