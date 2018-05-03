@@ -23,4 +23,4 @@ def get_mnist():
 	Y_Train = util.to_categorical(Y_Train, categories)
 	Y_Test = util.to_categorical(Y_Test, categories)
 
-	return X_Train, X_Test, Y_Train, Y_Test, rows, cols, categories
+	return X_Train[0:10000], X_Test[0:1000], Y_Train[0:10000], Y_Test[0:1000], rows, cols, categories

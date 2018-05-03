@@ -51,8 +51,8 @@ fc2 = Dense(num_classes)(fc1)
 PredictionLayer = Activation("softmax", name ="error_loss")(fc2)
 
 # Fianlly, we create a model object:
-model = Model(inputs=[InputLayer], outputs=[PredictionLayer])
-# model.summary()
+reference_model = Model(inputs=[InputLayer], outputs=[PredictionLayer])
+reference_model.summary()
 
 
 # In[3]:
@@ -64,41 +64,41 @@ batch_size = 256
 # Adam optimizer
 optimizer = optimizers.Adam(lr=0.001)
 
-model.compile(optimizer, loss = {"error_loss": "categorical_crossentropy"}, metrics=["accuracy"])
+reference_model.compile(optimizer, loss = {"error_loss": "categorical_crossentropy"}, metrics=["accuracy"])
 
-model.fit(x=X_train, y=Y_train, 
+reference_model.fit(x=X_train, y=Y_train, 
           epochs= epochs, batch_size = batch_size,
-          verbose = 0, validation_data=(X_test, Y_test))
+          verbose = 1, validation_data=(X_test, Y_test))
 
-score = model.evaluate(X_test, Y_test, verbose=0)
+score = reference_model.evaluate(X_test, Y_test, verbose=0)
 print('Test accuracy:', score[1])
 
 
 # In[4]:
 
 
-keras.models.save_model(model, "./my_pretrained_net")
+keras.models.save_model(reference_model, "./ref_model")
 
-# model = keras.models.load_model("./my_pretrained_net")
-pre_trained_model = keras.models.load_model("./my_pretrained_net")
+pre_trained_model = keras.models.load_model("./ref_model")
 
 
-# In[6]:
+# In[5]:
 
 
 from priors import GMMPrior
 from keras_helpers import fetch_weights
 
-pi_zero = 0.099
+pi_zero = 0.99
 
-reg_layer = GMMPrior(16, fetch_weights(model), pre_trained_model.get_weights(), pi_zero, name="complexity_loss")(fc2)
+reg_layer = GMMPrior(16, fetch_weights(reference_model), 
+                     pre_trained_model.get_weights(), pi_zero, name="complexity_loss")(fc2)
 
-model = Model(inputs=[InputLayer], outputs=[PredictionLayer, reg_layer])
+compressed_model = Model(inputs=[InputLayer], outputs=[PredictionLayer, reg_layer])
 
-model.summary()
+compressed_model.summary()
 
 
-# In[7]:
+# In[ ]:
 
 
 import optimizers 
@@ -107,21 +107,20 @@ from keras_helpers import identity
 tau = 0.003
 N = X_train.shape[0] 
 
-opt = optimizers.Adam(lr = [5e-4,1e-4,3e-3,3e-3],  #[unnamed, means, log(precition), log(mixing proportions)]
-                      param_types_dict = ['means','gammas','rhos'])
+opt = optimizers.Adam(lr = [5e-4,1e-4,3e-3,3e-3], param_types_dict = ['means','gammas','rhos'])
 
-model.compile(optimizer = opt,
+compressed_model.compile(optimizer = opt,
               loss = {"error_loss": "categorical_crossentropy", "complexity_loss": identity},
               loss_weights = {"error_loss": 1. , "complexity_loss": tau/N},
               metrics = ['accuracy'])
 
 
-# In[8]:
+# In[ ]:
 
 
-epochs = 1
+epochs = 30
 batch_size = 256
-model.fit({"input": X_train,},
+compressed_model.fit({"input": X_train,},
           {"error_loss" : Y_train, "complexity_loss": np.zeros((N,1))},
           epochs = epochs,
           batch_size = batch_size,
@@ -130,18 +129,18 @@ model.fit({"input": X_train,},
 
 # ## Part 3 - Post Processing Steps
 
-# In[9]:
+# In[ ]:
 
 
 import helper_functions
 
 
-# In[10]:
+# In[ ]:
 
 
-weights_retrain = np.copy(model.get_weights())
-weights_compressed = np.copy(model.get_weights())
-weights_compressed[:-3] = helper_functions.discretesize(weights_compressed, pi_zero = 0.99)
+weights_retrain = np.copy(compressed_model.get_weights())
+weights_compressed = np.copy(compressed_model.get_weights())
+weights_compressed[:-3] = helper_functions.discretesize(np.copy(weights_compressed), pi_zero = pi_zero)
 
 
 # Next step is to compare the accuracy of the pre-trained network with the network obtained post-processing. The procedure to do that is as follows. 
@@ -154,12 +153,12 @@ print("The accuracy of model is: \n")
 acc = pre_trained_model.evaluate({'input':X_test,}, {"error_loss": Y_test,}, verbose=0)[1]
 print("Reference Network: %.4f \n" % acc)
 
-acc2 = model.evaluate({'input': X_test,}, {"error_loss": Y_test, "complexity_loss": Y_test,}, verbose=0)[3]
+acc2 = compressed_model.evaluate({'input': X_test,}, {"error_loss": Y_test, "complexity_loss": Y_test,}, verbose=0)[3]
 print("Re-trained Network: %.4f \n" % acc2)
 
-model.set_weights(weights_compressed)
+compressed_model.set_weights(weights_compressed)
 
-acc3 = model.evaluate({'input': X_test,}, {"error_loss": Y_test, "complexity_loss": Y_test,}, verbose=0)[3]
+acc3 = compressed_model.evaluate({'input': X_test,}, {"error_loss": Y_test, "complexity_loss": Y_test,}, verbose=0)[3]
 print("Post Processed Network: %.4f \n" % acc3)
 
 
@@ -170,7 +169,7 @@ print("Post Processed Network: %.4f \n" % acc3)
 
 from helper_functions import special_flatten as flatten_1
 weight_vec = flatten_1(weights_compressed[:-3]).flatten()
-print("Percentage of Non-Zero Weights: %.3f %%" % (100.* np.count_nonzero(weight_vec)/ weight_vec.size))
+print("Percentage of Non-Zero Weights: %.3f %%" % (100.* (1 - np.count_nonzero(weight_vec)/ weight_vec.size)))
 
 
 # In[ ]:
