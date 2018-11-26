@@ -4,9 +4,9 @@ Library Dependencies - Keras 2.0.0, Tensorflow 1.8, python3.6.2
 
 For ease of understanding, the code is divided between 5 files. A brief description is provided below. 
 
-helper_functions.py - Contains a few utility functions required to facilitate the process. 
-keras_helpers.py - Extended the functionality of Keras library functions to help us in the process. 
-optimizers.py - A code for the Adam Optimizer. 
+helper_functions.py - Contains a few utility functions required to facilitate the process.
+keras_helpers.py - Extended the functionality of Keras library functions to help us in the process.
+optimizers.py - A code for the Adam Optimizer.
 priors.py - An implementation of Gaussian Mixture Model prior. 
 data.py - Loading the MNIST dataset and storing in the format required for the paper.
 
